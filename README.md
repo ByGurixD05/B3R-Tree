@@ -46,4 +46,4 @@ This repository contains the implementation of a B3R Tree in order to store inte
     java exampleB3R_Tree
     ```
 ## 📊 Project Status
-Just started. Nothing implemented
+Node Structure Class implemented. Tree still remaining.
