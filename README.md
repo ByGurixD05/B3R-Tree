@@ -17,14 +17,14 @@ Paradigm: Object-Oriented Programming.
 
 📂 Repository Structure
 ├── src/
-|   ├── main
-│      ├── B3RTree.java           # Main B3R Tree class
-│      └── Node.java              # Node representation class
-|   ├── test
-│      └── exampleB3R_Tree.java   # Test class with usage examples
+│ ├── main/
+│ │ ├── B3RTree.java # Main B3R Tree class
+│ │ └── Node.java # Node representation class
+│ ├── test/
+│ │ └── exampleB3R_Tree.java # Test class with usage examples
 │
-├── README.md                     # This file
-├── docs/                         # Javadoc documentation
-|    ├── index.html               # Main Javadoc entry point 
-│    └── ...                      # Other Javadoc-generated files 
-└── diagrams/                     # Images of the tree represented
+├── README.md # This file
+├── docs/ # Javadoc documentation
+│ ├── index.html # Main Javadoc entry point
+│ └── ... # Other Javadoc-generated files
+└── diagrams/ # Images of the tree represented
