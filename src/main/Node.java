@@ -156,22 +156,17 @@ public class Node {
      * @param value The key value to be inserted.
      */
     public void insertKey(int value) {
-        if (!hasSpace()) return;
-        if (keys[0] == null || keys[1] == null) {
-            if (keys[0] == null || keys[1] < value) {
-                if (keys[0] != null) {
-                    keys[1] = keys[0];
-                }
-                keys[0] = value;
-            } else {
-                keys[1] = value;
+        if (!hasSpace()) return; 
+        
+        if (keys[0] == null || keys[0] > value) {
+            if (keys[0] != null) {
+                keys[1] = keys[0];
             }
-        } else if (value < keys[0]) {
-            keys[1] = keys[0];
             keys[0] = value;
-        } else if (value < keys[1]) {
-            keys[1] = value;
+        } else {
+            keys[1] = value; 
         }
+        
     }
 
     /**
@@ -179,12 +174,19 @@ public class Node {
      * @param value The key value to be removed.
      */
     public void removeKey(int value) {
-        for (int i = 0; i < keys.length; i++) {
-            if (keys[i] == value) {
-                keys[i] = null;
-                return;
+        if (keys[0] != null && keys[0] == value) {
+            keys[0] = null;
+
+            if (keys[1] != null) {
+                keys[0] = keys[1];
+                keys[1] = null;
             }
         }
+
+        else if (keys[1] != null && keys[1] == value) {
+            keys[1] = null;
+        }
+    
     }
 
     /**
@@ -193,13 +195,21 @@ public class Node {
      * @return The popped key value, or null if not found.
      */
     public Integer popKey(int value) {
-        for (int i = 0; i < keys.length; i++) {
-            if (keys[i] != null && keys[i] == value) {
-                Integer poppedValue = keys[i];
-                keys[i] = null;
-                return poppedValue;
+        if (keys[0] != null && keys[0] == value) {
+            Integer poppedValue = keys[0];
+            keys[0] = null;
+        
+            if (keys[1] != null) {
+                keys[0] = keys[1];
+                keys[1] = null;
             }
+            return poppedValue;
+        }else if (keys[1] != null && keys[1] == value) {
+            Integer poppedValue = keys[1];
+            keys[1] = null;
+            return poppedValue;
         }
+
         return null;
     }
 
