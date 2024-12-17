@@ -20,8 +20,7 @@ This repository contains the implementation of a B3R Tree in order to store inte
 │   ├── main/
 │   │   ├── B3RTree.java           # Main B3R Tree class
 │   │   └── Node.java              # Node representation class
-│   ├── test/
-│   │   └── exampleB3R_Tree.java   # Test class with usage examples
+│   ├── App                        # Test class with usage examples
 ├── README.md                      # This file
 ├── docs/                          # Javadoc documentation
 │   ├── index.html                 # Main Javadoc entry point
