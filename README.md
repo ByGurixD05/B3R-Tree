@@ -46,4 +46,5 @@ This repository contains the implementation of a B3R Tree in order to store inte
     java exampleB3R_Tree
     ```
 ## 📊 Project Status
-Node Structure Class implemented. Tree insertion implemented. Balancing adn the rest of functions in progress.
+- **Node Class**: Already implemented. Changed it in the last version, in order to handle the keys directly from the tree.
+- **Tree Class**: Creation and insertion already implemented. The remaining functions still in progress.
