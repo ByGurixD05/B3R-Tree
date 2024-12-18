@@ -1,112 +1,194 @@
 package main;
 
 /**
- * Represents a B3R Tree (a type of tree with 3 pointers per node, used in various applications such as databases).
- * This tree structure supports insertion of integer values while maintaining the tree's properties.
- * It includes functionality for adding values to the tree, checking the number of keys, and ensuring the tree remains balanced.
+ * This class implemetn
  */
 public class B3RTree {
 
-    //----------ATTRIBUTES----------
+    /** The degree of the B3RTree, which determines the maximum number of children a node can have. */
+    private final int degree;
 
-    /** Root node of the tree. */
+    /** The root node of the tree. */
     private Node root;
 
-    /** Total number of keys in the tree. */
-    private int numKeysTree;
-
     /**
-     * Default constructor that initializes an empty B3R tree.
+     * Constructs a B3RTree with a default degree of 3 and an empty root node.
      */
     public B3RTree() {
-        root = null;
-        numKeysTree = 0;
+        this.degree = 3;
+        this.root = new Node(degree);
     }
 
     /**
-     * Retrieves the total number of keys in the tree.
-     * @return The number of keys in the tree.
+     * Returns the root node of the tree.
+     *
+     * @return the root node.
      */
-    public int getNumKeys() {
-        return numKeysTree;
+    public Node getRoot() {
+        return root;
     }
 
     /**
-     * Checks if the tree is empty.
-     * @return {@code True} if the tree is empty, otherwise {@code False}.
+     * Sets the root node of the tree.
+     *
+     * @param root the new root node.
      */
-    private boolean isEmpty() {
-        return root == null;
+    public void setRoot(Node root) {
+        this.root = root;
     }
 
     /**
-     * Inserts a new value into the tree. If the tree is empty, it initializes a new root.
-     * If the root has space, the value is inserted there. If not, the tree is traversed 
-     * and the appropriate position is found for the new value.
-     * Balancing of the tree may occur after insertion.
-     * @param value The integer value to be inserted into the tree.
+     * Returns the upper bound on the number of keys a node can hold.
+     * This is equal to degree - 1.
+     *
+     * @return the upper bound on the number of keys.
      */
-    public void insertValue(int value) {
-        if (isEmpty()) {
-            root = new Node();
-            root.insertKey(value);
-            numKeysTree++;
-            return;
+    public int upperBoundKeys() {
+        return degree - 1;
+    }
+
+    /**
+     * Returns the lower bound on the number of keys a node must hold.
+     * This is equal to degree / 2.
+     *
+     * @return the lower bound on the number of keys.
+     */
+    public int lowerBoundKeys() {
+        return degree / 2;
+    }
+
+    /**
+     * Returns the upper bound on the number of children a node can have.
+     * This is equal to the degree of the tree.
+     *
+     * @return the upper bound on the number of children.
+     */
+    public int upperBoundChildren() {
+        return degree;
+    }
+
+    /**
+     * Inserts a key into the B3RTree. If the root node is full, it splits and a new root is created.
+     *
+     * @param key the key to be inserted.
+     */
+    public void insert(int key) {
+        Node r = root;
+        if (r.getSize() == upperBoundKeys()) {
+            Node s = new Node(degree);
+            root = s;
+            s.setLeaf(false);
+            s.setSize(0);
+            s.getChildren().set(0, r);
+            splitChild(s, 0, r);
+            insertNonFull(s, key);
+        } else {
+            insertNonFull(r, key);
+        }
+    }
+
+    /**
+     * Splits a child node that is full into two nodes, promoting a key from the child to the parent node.
+     *
+     * @param parent the parent node.
+     * @param index the index of the child to split.
+     * @param child the child node to split.
+     */
+    private void splitChild(Node parent, int index, Node child) {
+        Node sibling = new Node(degree);
+        sibling.setLeaf(child.isLeaf());
+        sibling.setSize(upperBoundKeys() - lowerBoundKeys() - 1);
+
+        for (int j = 0; j < sibling.getSize(); j++) {
+            sibling.getKeys().set(j, child.getKeys().get(j + lowerBoundKeys() + 1));
         }
 
-        // If root has space, insert the value into root.
-        if (root.hasSpace()) {
-            root.insertKey(value);
-            numKeysTree++;
-            if (!root.hasSpace()) root.setLeaf(false);
-            return;
+        if (!child.isLeaf()) {
+            for (int j = 0; j < sibling.getSize() + 1; j++) {
+                sibling.getChildren().set(j, child.getChildren().get(j + lowerBoundKeys() + 1));
+            }
         }
 
-        // Traverse the tree and find the appropriate place for the value.
-        Node current = root;
-        Node previous = null;
-        char flag = ' ';
+        child.setSize(lowerBoundKeys());
+        parent.getChildren().add(index + 1, sibling);
+        parent.getChildren().remove(degree);
 
-        while (!current.isLeaf()) {
-            previous = current;
-            if (current.hasSpace()) {
-                current = (current.getKeys()[0] > value) ? current.getLeft() : current.getRight();
-                flag = (current.getKeys()[0] > value) ? 'l' : 'r';
-            } else {
-                if (current.getKeys()[0] > value) {
-                    current = current.getLeft();
-                    flag = 'l';
-                } else if (current.getKeys()[1] < value) {
-                    current = current.getRight();
-                    flag = 'r';
-                } else {
-                    current = current.getCenter();
-                    flag = 'c';
+        parent.getKeys().add(index, child.getKeys().get(lowerBoundKeys()));
+        parent.getKeys().remove(upperBoundKeys());
+
+        parent.setSize(parent.getSize() + 1);
+    }
+
+    /**
+     * Inserts a key into a node that is not full. This is a recursive method.
+     *
+     * @param node the node where the key should be inserted.
+     * @param key the key to be inserted.
+     */
+    private void insertNonFull(Node node, int key) {
+        int i = node.getSize() - 1;
+        if (node.isLeaf()) {
+            while (i >= 0 && key < node.getKeys().get(i)) {
+                i--;
+            }
+            node.getKeys().add(i + 1, key);
+            node.getKeys().remove(upperBoundKeys());
+            node.setSize(node.getSize() + 1);
+        } else {
+            while (i >= 0 && key < node.getKeys().get(i)) {
+                i--;
+            }
+            i++;
+
+            if (node.getChildren().get(i).getSize() == upperBoundKeys()) {
+                splitChild(node, i, node.getChildren().get(i));
+                if (key > node.getKeys().get(i)) {
+                    i++;
                 }
             }
-
-            // If a null child is encountered and previous node is not a leaf, create a new node and insert the value.
-            if (current == null) {
-                current = new Node();
-                current.insertKey(value);
-                switch (flag) {
-                    case 'l' -> previous.setLeft(current);
-                    case 'r' -> previous.setRight(current);
-                    case 'c' -> previous.setCenter(previous);
-                }
-            }
+            insertNonFull(node.getChildren().get(i), key);
         }
-
-        // Increment the number of keys and balance the tree.
-        numKeysTree++;
-        balanceTree();
     }
 
     /**
-     * Balances the tree after an insertion to ensure that it maintains its correct structure.
-     * This method is currently a placeholder and should be implemented to balance the tree.
+     * Returns a string representation of the tree, printing keys and levels.
+     *
+     * @return a string representation of the tree.
      */
-    private void balanceTree() {
-        // Placeholder for future implementation of tree balancing.
+    @Override
+    public String toString() {
+        return printTreeHelper(root, 0);
+    }
+
+    /**
+     * Helper method to recursively print the tree structure.
+     *
+     * @param currentNode the current node to print.
+     * @param depth the current depth in the tree (used for indentation).
+     * @return a string representation of the tree starting from the current node.
+     */
+    public String printTreeHelper(Node currentNode, int depth) {
+        StringBuilder result = new StringBuilder();
+        String indent = " ".repeat(depth * 4);
+
+        for (int i = 0; i < currentNode.getSize(); i++) {
+            if (!currentNode.isLeaf() && currentNode.getChildren().get(i) != null) {
+                result.append(printTreeHelper(currentNode.getChildren().get(i), depth + 1));
+            }
+            if (currentNode.getKeys().get(i) != null) {
+                result.append(indent)
+                      .append("Key: ")
+                      .append(currentNode.getKeys().get(i))
+                      .append(", Level: ")
+                      .append(depth)
+                      .append("\n");
+            }
+        }
+
+        if (!currentNode.isLeaf()) {
+            result.append(printTreeHelper(currentNode.getChildren().get(currentNode.getSize()), depth + 1));
+        }
+
+        return result.toString();
     }
 }
