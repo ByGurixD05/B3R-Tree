@@ -27,15 +27,18 @@ public class Node {
     /** Indicates whether the node is a leaf node. */
     private boolean leaf;
 
+    /** Number of keys currently in the node. */
+    private int numKeys;
+
     /**
      * Default constructor that initializes a node with no parent or children,
      * an empty keys array, and sets the node as a leaf.
      */
     public Node() {
         parent = left = center = right = null;
-        keys = new Integer[2];
-        leaf = true;
-        keys = new Integer[2];
+        keys = new Integer[2]; // Array to hold keys, with a maximum of 2 keys.
+        leaf = true; // Node is a leaf by default.
+        numKeys = 0; // No keys initially.
     }
 
     //----------SETTERS AND GETTERS----------
@@ -54,6 +57,14 @@ public class Node {
      */
     public void setParent(Node parent) {
         this.parent = parent;
+    }
+
+    /**
+     * Retrieves the number of keys currently in the node.
+     * @return The number of keys.
+     */
+    public int getNumKeys(){
+        return numKeys;
     }
 
     /**
@@ -122,7 +133,7 @@ public class Node {
 
     /**
      * Checks if the node is a leaf.
-     * @return True if the node is a leaf, otherwise false.
+     * @return {@code True} if the node is a leaf, otherwise {@code False}.
      */
     public boolean isLeaf() {
         return this.leaf;
@@ -130,7 +141,7 @@ public class Node {
 
     /**
      * Sets whether the node is a leaf.
-     * @param leaf True to set the node as a leaf, otherwise false.
+     * @param leaf {@code True} to set the node as a leaf, otherwise {@code False}.
      */
     public void setLeaf(boolean leaf) {
         this.leaf = leaf;
@@ -138,7 +149,7 @@ public class Node {
 
     /**
      * Checks if the node has space for additional keys.
-     * @return True if there is space, otherwise false.
+     * @return {@code True} if there is space, otherwise {@code False}.
      */
     public boolean hasSpace() {
         for (Integer key : keys) {
@@ -149,6 +160,26 @@ public class Node {
         return false;
     }
 
+    /**
+     * Checks if the node has a child.
+     * @return {@code True} if it has children, otherwise {@code False}.
+     */
+    public boolean hasChildren() {
+        return left != null || center != null || right != null;
+    }
+
+    /**
+     * Retrieves the pointer type of the current node's position.
+     * @param current The current node whose child pointer flag is to be determined.
+     * @return 'r' for right, 'l' for left, or 'c' for center.
+     */
+    public char getChildPointerFlag(Node current){
+        return 
+        (current.getParent().getRight() == right) ? 'r' : 
+        (current.getParent().getLeft() == left)   ? 'l' : 
+        'c'; // Determines whether the current node is the left, center, or right child.
+    }
+
     //----------NODE OPERATION METHODS----------
 
     /**
@@ -156,17 +187,19 @@ public class Node {
      * @param value The key value to be inserted.
      */
     public void insertKey(int value) {
-        if (!hasSpace()) return; 
-        
+        if (!hasSpace()) return; // No space available, do nothing.
+
+        // Insert the value into the correct position in the keys array.
         if (keys[0] == null || keys[0] > value) {
             if (keys[0] != null) {
-                keys[1] = keys[0];
+                keys[1] = keys[0]; // Move the first key to the second position.
             }
             keys[0] = value;
+            numKeys++;
         } else {
-            keys[1] = value; 
+            keys[1] = value; // Insert the value in the second key position.
+            numKeys++;
         }
-        
     }
 
     /**
@@ -181,12 +214,11 @@ public class Node {
                 keys[0] = keys[1];
                 keys[1] = null;
             }
-        }
-
-        else if (keys[1] != null && keys[1] == value) {
+            numKeys--;
+        } else if (keys[1] != null && keys[1] == value) {
             keys[1] = null;
+            numKeys--;
         }
-    
     }
 
     /**
@@ -198,15 +230,17 @@ public class Node {
         if (keys[0] != null && keys[0] == value) {
             Integer poppedValue = keys[0];
             keys[0] = null;
-        
+
             if (keys[1] != null) {
                 keys[0] = keys[1];
                 keys[1] = null;
             }
+            numKeys--;
             return poppedValue;
-        }else if (keys[1] != null && keys[1] == value) {
+        } else if (keys[1] != null && keys[1] == value) {
             Integer poppedValue = keys[1];
             keys[1] = null;
+            numKeys--;
             return poppedValue;
         }
 
