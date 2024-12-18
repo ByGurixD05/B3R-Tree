@@ -1,268 +1,113 @@
 package main;
 
+import java.util.ArrayList;
+
 /**
- * Represents a node structure for a B3R Tree Implementation.
- * Each node contains references to its parent and children (left, center, right), 
- * an array of keys, and a flag indicating if it is a leaf node.
+ * This class represents a node in a B3RTree (a type of B-tree). It contains
+ * keys and child nodes, along with information about its size and whether
+ * it is a leaf node.
  */
 public class Node {
 
-    //----------ATTRIBUTES----------
+    /** List of keys stored in the node. */
+    private ArrayList<Integer> keys;
 
-    /** Pointer to the parent node. */
-    private Node parent;
+    /** List of child nodes in the tree. */
+    private ArrayList<Node> children;
 
-    /** Pointer to the left child node. */
-    private Node left;
+    /** The number of keys currently stored in the node. */
+    private int size;
 
-    /** Pointer to the center child node. */
-    private Node center;
-
-    /** Pointer to the right child node. */
-    private Node right;
-
-    /** Array storing up to two integer keys. */
-    private Integer keys[];
-
-    /** Indicates whether the node is a leaf node. */
-    private boolean leaf;
-
-    /** Number of keys currently in the node. */
-    private int numKeys;
+    /** Indicates if the node is a leaf (does not have children). */
+    private boolean isLeaf;
 
     /**
-     * Default constructor that initializes a node with no parent or children,
-     * an empty keys array, and sets the node as a leaf.
+     * Constructs a new node with the specified degree. The node is initialized
+     * with empty keys and null children.
+     *
+     * @param degree the maximum number of children a node can have (degree of the B-tree).
      */
-    public Node() {
-        parent = left = center = right = null;
-        keys = new Integer[2]; // Array to hold keys, with a maximum of 2 keys.
-        leaf = true; // Node is a leaf by default.
-        numKeys = 0; // No keys initially.
-    }
-
-    //----------SETTERS AND GETTERS----------
-
-    /**
-     * Retrieves the parent node.
-     * @return The parent node.
-     */
-    public Node getParent() {
-        return parent;
+    public Node(int degree) {
+        keys = new ArrayList<>(degree - 1);
+        children = new ArrayList<>(degree);
+        for (int i = 0; i < degree - 1; i++) {
+            keys.add(0);
+            children.add(null);
+        }
+        children.add(null);
+        size = 0;
+        isLeaf = true;
     }
 
     /**
-     * Sets the parent node.
-     * @param parent The parent node to be set.
+     * Returns the number of keys currently stored in the node.
+     *
+     * @return the size of the node.
      */
-    public void setParent(Node parent) {
-        this.parent = parent;
+    public int getSize() {
+        return size;
     }
 
     /**
-     * Retrieves the number of keys currently in the node.
-     * @return The number of keys.
+     * Sets the number of keys stored in the node.
+     *
+     * @param size the new size of the node.
      */
-    public int getNumKeys(){
-        return numKeys;
+    public void setSize(int size) {
+        this.size = size;
     }
 
     /**
-     * Retrieves the left child node.
-     * @return The left child node.
+     * Checks if the node is a leaf node (does not have children).
+     *
+     * @return true if the node is a leaf, false otherwise.
      */
-    public Node getLeft() {
-        return left;
+    public boolean isLeaf() {
+        return isLeaf;
     }
 
     /**
-     * Sets the left child node.
-     * @param left The left child node to be set.
+     * Sets whether the node is a leaf node.
+     *
+     * @param isLeaf true if the node should be a leaf, false otherwise.
      */
-    public void setLeft(Node left) {
-        this.left = left;
+    public void setLeaf(boolean isLeaf) {
+        this.isLeaf = isLeaf;
     }
 
     /**
-     * Retrieves the center child node.
-     * @return The center child node.
+     * Returns the list of keys stored in the node.
+     *
+     * @return the list of keys.
      */
-    public Node getCenter() {
-        return center;
-    }
-
-    /**
-     * Sets the center child node.
-     * @param center The center child node to be set.
-     */
-    public void setCenter(Node center) {
-        this.center = center;
-    }
-
-    /**
-     * Retrieves the right child node.
-     * @return The right child node.
-     */
-    public Node getRight() {
-        return right;
-    }
-
-    /**
-     * Sets the right child node.
-     * @param right The right child node to be set.
-     */
-    public void setRight(Node right) {
-        this.right = right;
-    }
-
-    /**
-     * Retrieves the keys stored in the node.
-     * @return An array of keys.
-     */
-    public Integer[] getKeys() {
+    public ArrayList<Integer> getKeys() {
         return keys;
     }
 
     /**
-     * Sets the keys stored in the node.
-     * @param keys An array of keys to be set.
+     * Sets the list of keys stored in the node.
+     *
+     * @param keys the new list of keys.
      */
-    public void setKeys(Integer[] keys) {
+    public void setKeys(ArrayList<Integer> keys) {
         this.keys = keys;
     }
 
     /**
-     * Checks if the node is a leaf.
-     * @return {@code True} if the node is a leaf, otherwise {@code False}.
+     * Returns the list of child nodes of the current node.
+     *
+     * @return the list of child nodes.
      */
-    public boolean isLeaf() {
-        return this.leaf;
+    public ArrayList<Node> getChildren() {
+        return children;
     }
 
     /**
-     * Sets whether the node is a leaf.
-     * @param leaf {@code True} to set the node as a leaf, otherwise {@code False}.
+     * Sets the list of child nodes for the current node.
+     *
+     * @param children the new list of child nodes.
      */
-    public void setLeaf(boolean leaf) {
-        this.leaf = leaf;
-    }
-
-    /**
-     * Checks if the node has space for additional keys.
-     * @return {@code True} if there is space, otherwise {@code False}.
-     */
-    public boolean hasSpace() {
-        for (Integer key : keys) {
-            if (key == null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks if the node has a child.
-     * @return {@code True} if it has children, otherwise {@code False}.
-     */
-    public boolean hasChildren() {
-        return left != null || center != null || right != null;
-    }
-
-    /**
-     * Retrieves the pointer type of the current node's position.
-     * @param current The current node whose child pointer flag is to be determined.
-     * @return 'r' for right, 'l' for left, or 'c' for center.
-     */
-    public char getChildPointerFlag(Node current){
-        return 
-        (current.getParent().getRight() == right) ? 'r' : 
-        (current.getParent().getLeft() == left)   ? 'l' : 
-        'c'; // Determines whether the current node is the left, center, or right child.
-    }
-
-    //----------NODE OPERATION METHODS----------
-
-    /**
-     * Inserts a key into the node if space is available.
-     * @param value The key value to be inserted.
-     */
-    public void insertKey(int value) {
-        if (!hasSpace()) return; // No space available, do nothing.
-
-        // Insert the value into the correct position in the keys array.
-        if (keys[0] == null || keys[0] > value) {
-            if (keys[0] != null) {
-                keys[1] = keys[0]; // Move the first key to the second position.
-            }
-            keys[0] = value;
-            numKeys++;
-        } else {
-            keys[1] = value; // Insert the value in the second key position.
-            numKeys++;
-        }
-    }
-
-    /**
-     * Removes a key from the node.
-     * @param value The key value to be removed.
-     */
-    public void removeKey(int value) {
-        if (keys[0] != null && keys[0] == value) {
-            keys[0] = null;
-
-            if (keys[1] != null) {
-                keys[0] = keys[1];
-                keys[1] = null;
-            }
-            numKeys--;
-        } else if (keys[1] != null && keys[1] == value) {
-            keys[1] = null;
-            numKeys--;
-        }
-    }
-
-    /**
-     * Pops (removes and returns) a key from the node.
-     * @param value The key value to be popped.
-     * @return The popped key value, or null if not found.
-     */
-    public Integer popKey(int value) {
-        if (keys[0] != null && keys[0] == value) {
-            Integer poppedValue = keys[0];
-            keys[0] = null;
-
-            if (keys[1] != null) {
-                keys[0] = keys[1];
-                keys[1] = null;
-            }
-            numKeys--;
-            return poppedValue;
-        } else if (keys[1] != null && keys[1] == value) {
-            Integer poppedValue = keys[1];
-            keys[1] = null;
-            numKeys--;
-            return poppedValue;
-        }
-
-        return null;
-    }
-
-    //----------REPRESENTATION NODE METHODS----------
-
-    /**
-     * Returns a string representation of the node's keys.
-     * @return A string in the format [k1, k2].
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < keys.length; i++) {
-            sb.append(keys[i] == null ? "null" : keys[i]);
-            if (i < keys.length - 1) {
-                sb.append(", ");
-            }
-        }
-        sb.append("]");
-        return sb.toString();
+    public void setChildren(ArrayList<Node> children) {
+        this.children = children;
     }
 }
