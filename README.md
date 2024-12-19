@@ -47,4 +47,4 @@ This repository contains the implementation of a B3R Tree in order to store inte
     ```
 ## 📊 Project Status
 - **Node Class**: Already implemented. Changed it in the last version, in order to handle the keys directly from the tree.
-- **Tree Class**: Creation and insertion already implemented. The remaining functions still in progress.
+- **Tree Class**: All implemented but deletion method.
