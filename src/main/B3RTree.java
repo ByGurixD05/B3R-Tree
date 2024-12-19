@@ -151,6 +151,80 @@ public class B3RTree {
     }
 
     /**
+     * Searches for a specific value in the tree.
+     * 
+     * @param value the value to search for.
+     * @return {@code true} if the value is found in the tree, {@code false} otherwise.
+     * @throws NullPointerException if the tree's root or its children are not properly initialized.
+     */
+    public boolean searchValue(int value){
+        Node current = this.getRoot(); 
+        int index;
+    
+        while (!current.isLeaf()) {
+            index = current.getSize() - 1;
+    
+            while (index >= 0 && value < current.getKeys().get(index)) {
+                index--;
+            }
+    
+            if (index >= 0 && current.getKeys().get(index) == value) {
+                return true;
+            }
+
+            current = current.getChildren().get(index + 1);
+        }
+    
+        for (index = 0; index < current.getSize(); index++) {
+            if (current.getKeys().get(index) == value) {
+                return true;
+            }
+        }
+    
+        return false; 
+    }
+
+    /**
+     * Retrieves the maximum value stored in the tree.
+     * 
+     * @return the maximum value in the tree.
+     * @throws IllegalStateException if the tree is empty.
+     */
+    public int maxValue(){
+        Node current = this.getRoot();
+
+        if (current == null || current.getSize() == 0) {
+            throw new IllegalStateException("El árbol está vacío.");
+        }
+
+        while (!current.isLeaf()) {
+            current = current.getChildren().get(current.getSize());
+        }
+
+        return current.getKeys().get(current.getSize() - 1);
+    }
+
+    /**
+     * Retrieves the minimum value stored in the tree.
+     * 
+     * @return the minimum value in the tree.
+     * @throws IllegalStateException if the tree is empty.
+     */
+    public int minValue(){
+        Node current = this.getRoot();
+
+        if (current == null || current.getSize() == 0) {
+            throw new IllegalStateException("El árbol está vacío.");
+        }
+
+        while (!current.isLeaf()) {
+            current = current.getChildren().get(0);
+        }   
+
+        return current.getKeys().get(0);
+    }
+
+    /**
      * Returns a string representation of the tree, printing keys and levels.
      *
      * @return a string representation of the tree.
