@@ -1,7 +1,7 @@
 package main;
 
 /**
- * This class implemetn
+ * This class implements a B3R-Tree. This represents a BTree of degree 3. Maximum keys allowed = 2.
  */
 public class B3RTree {
 
@@ -17,6 +17,7 @@ public class B3RTree {
     public B3RTree() {
         this.degree = 3;
         this.root = new Node(degree);
+
     }
 
     /**
@@ -66,6 +67,65 @@ public class B3RTree {
     public int upperBoundChildren() {
         return degree;
     }
+
+    /**
+     * Counts the total number of nodes in the tree.
+     *
+     * @return the total number of nodes in the tree.
+     */
+    public int getNumNodes() {
+        return countNodesHelper(root);
+    }
+
+    /**
+     * Helper method for recursively counting the nodes in the tree.
+     *
+     * @param current the current node being traversed.
+     * @return the total number of nodes in the subtree rooted at {@code current}.
+     */
+    private int countNodesHelper(Node current) {
+        if (current == null) {
+            return 0;
+        }
+
+        int count = 1; // Count the current node
+        if (!current.isLeaf()) {
+            for (int i = 0; i <= current.getSize(); i++) {
+                count += countNodesHelper(current.getChildren().get(i));
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Counts the total number of keys in the tree.
+     *
+     * @return the total number of keys in the tree.
+     */
+    public int getTotalKeys() {
+        return countKeysHelper(root);
+    }
+
+    /**
+     * Helper method for recursively counting the keys in the tree.
+     *
+     * @param current the current node being traversed.
+     * @return the total number of keys in the subtree rooted at {@code current}.
+     */
+    private int countKeysHelper(Node current) {
+        if (current == null) {
+            return 0;
+        }
+
+        int keyCount = current.getSize(); // Count the keys in the current node
+        if (!current.isLeaf()) {
+            for (int i = 0; i <= current.getSize(); i++) {
+                keyCount += countKeysHelper(current.getChildren().get(i));
+            }
+        }
+        return keyCount;
+    }
+
 
     /**
      * Inserts a key into the B3RTree. If the root node is full, it splits and a new root is created.
