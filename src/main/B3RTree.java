@@ -261,7 +261,7 @@ public class B3RTree {
             current = current.getChildren().get(current.getSize());
         }
 
-        return current.getKeys().get(current.getSize() - 1);
+        return current.getKeys().get(current.getSize());
     }
 
     /**
