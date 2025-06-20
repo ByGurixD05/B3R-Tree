@@ -17,7 +17,7 @@ public class App {
                 break;
             }
 
-            try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName))) {
+            try (BufferedReader fileReader = new BufferedReader(new FileReader("src/"+fileName))) {
                 String line;
                 while ((line = fileReader.readLine()) != null) {
                     String[] data = line.split(" ");
