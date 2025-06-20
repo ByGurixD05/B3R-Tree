@@ -1,2 +1,10 @@
+# Ignore unwanted folders
+.idea/
 .vscode/
+out/
+
+# Ignore Java compiled files
 *.class
+
+# Ignore development environment files
+*.iml
