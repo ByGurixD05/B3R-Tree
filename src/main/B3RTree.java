@@ -211,6 +211,213 @@ public class B3RTree {
     }
 
     /**
+     * Deletes a key from the B-tree.
+     * If the root becomes empty and is not a leaf, the root is replaced by its first child to reduce the height.
+     *
+     * @param key the key to delete from the B-tree
+     */
+    public void delete(int key) {
+        deleteKey(root, key);
+        if (root.getSize() == 0 && !root.isLeaf()) {
+            root = root.getChildren().get(0); // Reducir la altura si se vacía la raíz
+        }
+    }
+
+    /**
+     * Recursively deletes a key from the subtree rooted at the given node.
+     *
+     * @param node the current node to inspect
+     * @param key  the key to delete
+     */
+    private void deleteKey(Node node, int key) {
+        int idx = findKeyIndex(node, key);
+
+        if (idx < node.getSize() && node.getKeys().get(idx) == key) {
+            if (node.isLeaf()) {
+                node.getKeys().remove(idx);
+                node.getKeys().add(upperBoundKeys() - 1, 0); // mantener tamaño
+                node.setSize(node.getSize() - 1);
+            } else {
+                deleteInternalNodeKey(node, key, idx);
+            }
+        } else {
+            if (node.isLeaf()) return;
+
+            boolean flag = (idx == node.getSize());
+            Node child = node.getChildren().get(idx);
+
+            if (child.getSize() < lowerBoundKeys()) {
+                fill(node, idx);
+            }
+
+            if (flag && idx > node.getSize()) {
+                deleteKey(node.getChildren().get(idx - 1), key);
+            } else {
+                deleteKey(node.getChildren().get(idx), key);
+            }
+        }
+    }
+
+    /**
+     * Deletes a key from an internal node by replacing it with its predecessor or successor,
+     * or by merging child nodes if necessary.
+     *
+     * @param node the internal node containing the key
+     * @param key  the key to delete
+     * @param idx  the index of the key in the node
+     */
+    private void deleteInternalNodeKey(Node node, int key, int idx) {
+        Node predChild = node.getChildren().get(idx);
+        Node succChild = node.getChildren().get(idx + 1);
+
+        if (predChild.getSize() >= lowerBoundKeys()) {
+            int pred = getPredecessor(predChild);
+            node.getKeys().set(idx, pred);
+            deleteKey(predChild, pred);
+        } else if (succChild.getSize() >= lowerBoundKeys()) {
+            int succ = getSuccessor(succChild);
+            node.getKeys().set(idx, succ);
+            deleteKey(succChild, succ);
+        } else {
+            merge(node, idx);
+            deleteKey(predChild, key);
+        }
+    }
+
+    /**
+     * Finds the index of the first key in the node that is greater than or equal to the given key.
+     *
+     * @param node the node to search
+     * @param key  the key to locate
+     * @return the index of the key
+     */
+    private int findKeyIndex(Node node, int key) {
+        int idx = 0;
+        while (idx < node.getSize() && node.getKeys().get(idx) < key) {
+            idx++;
+        }
+        return idx;
+    }
+
+    /**
+     * Retrieves the predecessor key of a node, which is the maximum key in the left subtree.
+     *
+     * @param node the node from which to find the predecessor
+     * @return the predecessor key
+     */
+    private int getPredecessor(Node node) {
+        while (!node.isLeaf()) {
+            node = node.getChildren().get(node.getSize());
+        }
+        return node.getKeys().get(node.getSize() - 1);
+    }
+
+    /**
+     * Retrieves the successor key of a node, which is the minimum key in the right subtree.
+     *
+     * @param node the node from which to find the successor
+     * @return the successor key
+     */
+    private int getSuccessor(Node node) {
+        while (!node.isLeaf()) {
+            node = node.getChildren().get(0);
+        }
+        return node.getKeys().get(0);
+    }
+
+    /**
+     * Ensures that the child node at index {@code idx} has enough keys by borrowing from a sibling
+     * or merging siblings if necessary.
+     *
+     * @param parent the parent node
+     * @param idx    the index of the child node
+     */
+    private void fill(Node parent, int idx) {
+        if (idx != 0 && parent.getChildren().get(idx - 1).getSize() >= lowerBoundKeys()) {
+            borrowFromPrev(parent, idx);
+        } else if (idx != parent.getSize() && parent.getChildren().get(idx + 1).getSize() >= lowerBoundKeys()) {
+            borrowFromNext(parent, idx);
+        } else {
+            if (idx != parent.getSize()) {
+                merge(parent, idx);
+            } else {
+                merge(parent, idx - 1);
+            }
+        }
+    }
+
+    /**
+     * Borrows a key from the left sibling of the child node at the given index.
+     *
+     * @param parent the parent node
+     * @param idx    the index of the child node
+     */
+    private void borrowFromPrev(Node parent, int idx) {
+        Node child = parent.getChildren().get(idx);
+        Node sibling = parent.getChildren().get(idx - 1);
+
+        child.getKeys().add(0, parent.getKeys().get(idx - 1));
+        parent.getKeys().set(idx - 1, sibling.getKeys().remove(sibling.getSize() - 1));
+
+        if (!sibling.isLeaf()) {
+            child.getChildren().add(0, sibling.getChildren().remove(sibling.getSize()));
+        }
+
+        sibling.setSize(sibling.getSize() - 1);
+        child.setSize(child.getSize() + 1);
+    }
+
+    /**
+     * Borrows a key from the right sibling of the child node at the given index.
+     *
+     * @param parent the parent node
+     * @param idx    the index of the child node
+     */
+    private void borrowFromNext(Node parent, int idx) {
+        Node child = parent.getChildren().get(idx);
+        Node sibling = parent.getChildren().get(idx + 1);
+
+        child.getKeys().add(parent.getKeys().get(idx));
+        parent.getKeys().set(idx, sibling.getKeys().remove(0));
+
+        if (!sibling.isLeaf()) {
+            child.getChildren().add(sibling.getChildren().remove(0));
+        }
+
+        sibling.setSize(sibling.getSize() - 1);
+        child.setSize(child.getSize() + 1);
+    }
+
+    /**
+     * Merges the child node at index {@code idx} with its right sibling, and adjusts the parent node.
+     *
+     * @param parent the parent node
+     * @param idx    the index of the child node to merge
+     */
+    private void merge(Node parent, int idx) {
+        Node child = parent.getChildren().get(idx);
+        Node sibling = parent.getChildren().get(idx + 1);
+
+        child.getKeys().add(parent.getKeys().remove(idx));
+        child.setSize(child.getSize() + 1);
+
+        for (int i = 0; i < sibling.getSize(); i++) {
+            child.getKeys().add(sibling.getKeys().get(i));
+            child.setSize(child.getSize() + 1);
+        }
+
+        if (!child.isLeaf()) {
+            for (int i = 0; i <= sibling.getSize(); i++) {
+                child.getChildren().add(sibling.getChildren().get(i));
+            }
+        }
+
+        parent.getChildren().remove(idx + 1);
+        parent.setSize(parent.getSize() - 1);
+    }
+
+
+    /**
      * Searches for a specific value in the tree.
      * 
      * @param value the value to search for.
